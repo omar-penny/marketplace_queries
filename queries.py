@@ -31,18 +31,61 @@ class Query:
         }
         page = 0
         limit = 20
-        sort, name = generate_random_inputs()
+        # sort, name = generate_random_inputs()
+        name = "hm1317C"
+        # name = "leg.54008"
+
         return [
             {
                 "$search": {
                     "compound": {
                         "should": [
                             {
+                                "phrase": {
+                                    "query": name,
+                                    "path": ["details.sku"],
+                                    "score": {"boost": {"value": 3}},
+                                },
+                            },
+
+                            {
+                                "phrase": {
+                                    "query": name,
+                                    "path": ["name.en"],
+                                    "score": {"boost": {"value": 2}},
+                                },
+                            },
+
+                            {
+                                "phrase": {
+                                    "query": name,
+                                    "path": ["details.brand"],
+                                    "score": {"boost": {"value": 2}},
+                                },
+                            },
+
+                            {
+                                "phrase": {
+                                    "query": name,
+                                    "path": ["details.description"],
+                                },
+                            },
+
+                            {
+                                "text": {
+                                    "query": name,
+                                    "path": ["details.sku"],
+                                    "score": {"boost": {"value": 3}},
+                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                }
+                            },
+
+                            {
                                 "text": {
                                     "query": name,
                                     "path": ["name.en"],
-                                    "score": {"boost": {"value": 3}},
-                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256},
+                                    "score": {"boost": {"value": 2}},
+                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
                                 },
                             },
 
@@ -50,15 +93,6 @@ class Query:
                                 "text": {
                                     "query": name,
                                     "path": ["details.description"],
-                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256},
-                                }
-                            },
-
-                            {
-                                "text": {
-                                    "query": name,
-                                    "path": ["details.sku"],
-                                    "score": {"boost": {"value": 2}},
                                     "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
                                 }
                             },
@@ -67,46 +101,60 @@ class Query:
                                 "text": {
                                     "query": name,
                                     "path": ["details.brand"],
-                                    "score": {"boost": {"value": 3}},
-                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 25},
+                                    "score": {"boost": {"value": 2}},
+                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
                                 }
-                            },
+                            }
                         ],
                     }
+                },
+
+                "$match": query,
+
+                "$project": {
+                    "id": 1,
+                    "name": 1,
+                    "categories": 1,
+                    "catalogs": 1,
+                    "details.description": 1,
+                    "details.isAvailable": 1,
+                    "details.brand": 1,
+                    "details.sku": 1,
+                    "details.soldBy": 1,
+                    "mediaList": 1,
+                    "price": 1,
+                    "score": {"$meta": "searchScore"}
                 },
 
                 "$skip": page * limit,
 
                 "$limit": limit,
 
-                "$match": query,
-
-                "$facet": {
-                    "paginatedResults": [
-                        {
-                            "$project": {
-                                "id": 1,
-                                "name": 1,
-                                "categories": 1,
-                                "catalogs": 1,
-                                "details.description": 1,
-                                "details.isAvailable": 1,
-                                "details.brand": 1,
-                                "details.sku": 1,
-                                "details.soldBy": 1,
-                                "mediaList": 1,
-                                "price": 1,
-                                "score": {"$meta": "searchScore"}
-                            }
-                        },
-                        {"$sort": {"score": -1}},
-                    ],
-                    "totalCount": [
-                        {
-                            "$count": 'count'
-                        }
-                    ]
-                }
+                # "$facet": {
+                #     "paginatedResults": [
+                #         {
+                #             # "$project": {
+                #             #     # "id": 1,
+                #             #     "name": 1,
+                #             #     # "categories": 1,
+                #             #     # "catalogs": 1,
+                #             #     "details.description": 1,
+                #             #     # "details.isAvailable": 1,
+                #             #     "details.brand": 1,
+                #             #     "details.sku": 1,
+                #             #     # "details.soldBy": 1,
+                #             #     # "mediaList": 1,
+                #             #     # "price": 1,
+                #             #     "score": {"$meta": "searchScore"}
+                #             # }
+                #         },
+                #     ],
+                #     "totalCount": [
+                #         {
+                #             "$count": 'count'
+                #         }
+                #     ]
+                # }
             }
 
         ]

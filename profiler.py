@@ -14,15 +14,6 @@ client = MongoClient(URI, tlsCAFile=certifi.where())
 db = client[DATABASE]
 collection = db[COLLECTION]
 
-
-def run_aggregation(pipeline: list) -> list:
-    products_list = []
-    for agg in collection.aggregate(pipeline, allowDiskUse=True):
-        products_list.append(agg)
-
-    return products_list
-
-
 if __name__ == "__main__":
     aggregation_pipeline = []
     runs = []
@@ -32,16 +23,22 @@ if __name__ == "__main__":
         aggregation_pipeline.append({stage: operations})
 
     start = datetime.datetime.now()
-    aggregation = run_aggregation(aggregation_pipeline)
-    runs.append({"totalCount": aggregation[0]["totalCount"]})
-    aggregation = aggregation[0]["paginatedResults"]
+    aggregation = list(collection.aggregate(aggregation_pipeline))
     end = datetime.datetime.now() - start
 
-    for i in range(0, 15):
+    # runs.append({"totalCount": aggregation[0]["totalCount"]})
+    # aggregation = aggregation[0]["paginatedResults"]
+
+    for i in range(0, len(aggregation)):
         runs.append({
             "number": i,
             "time": end.total_seconds(),
+            "name[en]": aggregation[i]["name"]["en"],
+            "sku": aggregation[i]["details"]["sku"],
+            "des": aggregation[i]["details"]["description"],
+            "brand": aggregation[i]["details"]["brand"],
             "score": aggregation[i]["score"],
         })
 
-    print(runs)
+    for i in runs:
+        print(i)
