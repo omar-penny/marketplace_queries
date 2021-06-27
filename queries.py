@@ -25,16 +25,9 @@ class Query:
         pass
 
     def main_search(self):
-        query = {
-            "status": "ACTIVE",
-            "catalogs.id": "penny-cat-1038",
-            "details.isAvailable": True,
-        }
         page = 0
         limit = 20
-        # sort, name = generate_random_inputs()
-        # name = "hm1317C"
-        name = "lig.54008"
+        sort, name = generate_random_inputs()
 
         return [
             {
@@ -79,7 +72,11 @@ class Query:
                     }
                 },
 
-                "$match": query,
+                "$match": {
+                    "status": "ACTIVE",
+                    "catalogs.id": "penny-cat-1038",
+                    "details.isAvailable": True,
+                },
 
                 "$project": {
                     "id": 1,
@@ -93,38 +90,11 @@ class Query:
                     "details.soldBy": 1,
                     "mediaList": 1,
                     "price": 1,
-                    "score": {"$meta": "searchScore"}
+                    "score": {"$meta": "searchScore"},
                 },
 
                 "$skip": page * limit,
 
                 "$limit": limit,
-
-                # "$facet": {
-                #     "paginatedResults": [
-                #         {
-                #             # "$project": {
-                #             #     # "id": 1,
-                #             #     "name": 1,
-                #             #     # "categories": 1,
-                #             #     # "catalogs": 1,
-                #             #     "details.description": 1,
-                #             #     # "details.isAvailable": 1,
-                #             #     "details.brand": 1,
-                #             #     "details.sku": 1,
-                #             #     # "details.soldBy": 1,
-                #             #     # "mediaList": 1,
-                #             #     # "price": 1,
-                #             #     "score": {"$meta": "searchScore"}
-                #             # }
-                #         },
-                #     ],
-                #     "totalCount": [
-                #         {
-                #             "$count": 'count'
-                #         }
-                #     ]
-                # }
             }
-
         ]
