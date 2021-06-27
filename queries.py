@@ -8,7 +8,6 @@ def generate_random_inputs() -> (str, str):
                     {"price.value": 1}, {"price.value": -1}]
     name_options = ["tools", "demolition", "grinder", "welding",
                     "rotary", "electric", "JW", "JW-00002", "impact"]
-    # skus, different names, brands etc
 
     sort = sort_options[randrange(len(sort_options))]
     name = name_options[randrange(len(name_options))]

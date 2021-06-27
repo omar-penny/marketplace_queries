@@ -19,15 +19,13 @@ if __name__ == "__main__":
     runs = []
     query = Query().main_search()
 
+    # Create aggregation stage list
     for stage, operations in query[0].items():
         aggregation_pipeline.append({stage: operations})
 
     start = datetime.datetime.now()
     aggregation = list(collection.aggregate(aggregation_pipeline))
     end = datetime.datetime.now() - start
-
-    # runs.append({"totalCount": aggregation[0]["totalCount"]})
-    # aggregation = aggregation[0]["paginatedResults"]
 
     for i in range(0, len(aggregation)):
         runs.append({
