@@ -35,7 +35,7 @@ if __name__ == "__main__":
             "time": end.total_seconds(),
             "name[en]": aggregation[i]["name"]["en"],
             "sku": aggregation[i]["details"]["sku"],
-            "des": aggregation[i]["details"]["description"],
+            "description": aggregation[i]["details"]["description"],
             "brand": aggregation[i]["details"]["brand"],
             "score": aggregation[i]["score"],
         })

@@ -8,6 +8,7 @@ def generate_random_inputs() -> (str, str):
                     {"price.value": 1}, {"price.value": -1}]
     name_options = ["tools", "demolition", "grinder", "welding",
                     "rotary", "electric", "JW", "JW-00002", "impact"]
+    # skus, different names, brands etc
 
     sort = sort_options[randrange(len(sort_options))]
     name = name_options[randrange(len(name_options))]
@@ -32,8 +33,8 @@ class Query:
         page = 0
         limit = 20
         # sort, name = generate_random_inputs()
-        name = "hm1317C"
-        # name = "leg.54008"
+        # name = "hm1317C"
+        name = "lig.54008"
 
         return [
             {
@@ -43,49 +44,17 @@ class Query:
                             {
                                 "phrase": {
                                     "query": name,
-                                    "path": ["details.sku"],
+                                    "path": ["name.en", "details.brand", "details.sku", "details.description"],
                                     "score": {"boost": {"value": 3}},
-                                },
-                            },
-
-                            {
-                                "phrase": {
-                                    "query": name,
-                                    "path": ["name.en"],
-                                    "score": {"boost": {"value": 2}},
-                                },
-                            },
-
-                            {
-                                "phrase": {
-                                    "query": name,
-                                    "path": ["details.brand"],
-                                    "score": {"boost": {"value": 2}},
-                                },
-                            },
-
-                            {
-                                "phrase": {
-                                    "query": name,
-                                    "path": ["details.description"],
                                 },
                             },
 
                             {
                                 "text": {
                                     "query": name,
-                                    "path": ["details.sku"],
-                                    "score": {"boost": {"value": 3}},
-                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
-                                }
-                            },
-
-                            {
-                                "text": {
-                                    "query": name,
-                                    "path": ["name.en"],
+                                    "path": ["name.en", "details.brand"],
                                     "score": {"boost": {"value": 2}},
-                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                    "fuzzy": {"maxEdits": 2, "prefixLength": 0, "maxExpansions": 10},
                                 },
                             },
 
@@ -93,18 +62,19 @@ class Query:
                                 "text": {
                                     "query": name,
                                     "path": ["details.description"],
-                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                    "fuzzy": {"maxEdits": 2, "prefixLength": 0, "maxExpansions": 10},
                                 }
                             },
 
                             {
                                 "text": {
                                     "query": name,
-                                    "path": ["details.brand"],
-                                    "score": {"boost": {"value": 2}},
-                                    "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                    "path": ["details.sku"],
+                                    "fuzzy": {"maxEdits": 2, "prefixLength": 0, "maxExpansions": 10},
+                                    "score": {"boost": {"value": 3}},
+
                                 }
-                            }
+                            },
                         ],
                     }
                 },
