@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from queries import Query
+from queries import autocomplete
 import datetime
 import certifi
 import os
@@ -17,7 +17,7 @@ collection = db[COLLECTION]
 if __name__ == "__main__":
     aggregation_pipeline = []
     runs = []
-    query = Query().main_search()
+    query = autocomplete()
 
     # Create aggregation stage list
     for stage, operations in query[0].items():
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     aggregation = list(collection.aggregate(aggregation_pipeline))
     end = datetime.datetime.now() - start
-
+    print(len(aggregation))
     for i in range(0, len(aggregation)):
         runs.append({
             "number": i,
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             "sku": aggregation[i]["details"]["sku"],
             "description": aggregation[i]["details"]["description"],
             "brand": aggregation[i]["details"]["brand"],
-            "score": aggregation[i]["score"],
+            # "score": aggregation[i]["score"],
         })
 
     for i in runs:
