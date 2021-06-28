@@ -97,3 +97,53 @@ class Query:
                 "$limit": limit,
             }
         ]
+
+    def autocomplete(self):
+
+        sort, name = generate_random_inputs()
+
+        return [
+                   {"$search": {
+                       "compound": {
+                           "should": [
+                               {"autocomplete": {"path": 'name.en', "query": name,
+                                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256}}},
+                               {"autocomplete": {"path": 'details.sku', "query": name,
+                                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256}}},
+                               {"autocomplete": {"path": 'details.brand', "query": name,
+                                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256}}},
+                               {
+                                   "text": {
+                                       "query": name,
+                                       "path": ['details.description'],
+                                   },
+                               },
+                           ],
+                       },
+                   },
+                   },
+                   {"$match": {
+                       "status": "ACTIVE",
+                       "catalogs.id": "penny-cat-1038",
+                       "details.isAvailable": True,
+                   }, },
+                   {
+                       "$project": {
+                           "id": 1,
+                           "name": 1,
+                           "categories": 1,
+                           "catalogs": 1,
+                           "details.description": 1,
+                           "details.isAvailable": 1,
+                           "details.brand": 1,
+                           "details.sku": 1,
+                           "details.soldBy": 1,
+                           "mediaList": 1,
+                           "price": 1,
+                           "score": {"$meta": "searchScore"},
+                       },
+                   },
+                   {
+                       "$limit": 5,
+                   },
+               ],
