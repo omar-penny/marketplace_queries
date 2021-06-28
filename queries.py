@@ -161,7 +161,8 @@ def autocomplete():
 
 
 def techSpecOptions():
-    return [
+    name = "test"
+    query = [
         {
             "$match": {
                 "status": "ACTIVE",
@@ -206,6 +207,46 @@ def techSpecOptions():
         },
     ]
 
+    if name:
+        query.insert(0, {
+            "$search": {
+                "compound": {
+                    "should": [
+                        {
+                            "text": {
+                                "query": name,
+                                "path": ['name.en'],
+                                "score": {"boost": {"value": 3}},
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256},
+                            },
+                        },
+                        {
+                            "text": {
+                                "query": name,
+                                "path": ['details.description'],
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256},
+                            },
+                        },
+                        {
+                            "text": {
+                                "query": name,
+                                "path": ['details.sku'],
+                                "score": {"boost": {"value": 2}},
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                            },
+                        },
+                        {
+                            "text": {
+                                "query": name,
+                                "path": ['details.brand'],
+                                "score": {"boost": {"value": 3}},
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 25},
+                            },
+                        },
+                    ],
+                },
+            },
+        })
 
 # def sub_categories():
 #     query = {
