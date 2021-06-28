@@ -92,8 +92,8 @@ def main_search():
 
 
 def autocomplete():
-    sort, name = generate_random_inputs()
-    name = "LEG.54"
+    # sort, name = generate_random_inputs()
+    name = "black"
 
     return [
         {
@@ -104,29 +104,32 @@ def autocomplete():
                             "autocomplete": {
                                 "path": 'name.en',
                                 "query": name,
-                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256}
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                "score": {"boost": {"value": 2}},
                             }
                         },
                         {
                             "autocomplete": {
                                 "path": 'details.sku',
                                 "query": name,
-                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256}
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                "score": {"boost": {"value": 3}},
                             }
                         },
                         {
                             "autocomplete": {
                                 "path": 'details.brand',
                                 "query": name,
-                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256}
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                "score": {"boost": {"value": 2}},
                             }
                         },
-                        {
-                            "text": {
-                                "query": name,
-                                "path": ['details.description'],
-                            },
-                        },
+                        # {
+                        #     "text": {
+                        #         "query": name,
+                        #         "path": ['details.description'],
+                        #     },
+                        # },
                     ],
                 },
             },
@@ -202,3 +205,48 @@ def techSpecOptions():
             "$limit": 5,
         },
     ]
+
+
+# def sub_categories():
+#     query = {
+#         "categories.path": ",penny-ctg-1191,penny-ctg-2112",
+#         "status": "ACTIVE",
+#         "catalogs.id": "penny-cat-1154",
+#         "details.isAvailable": True,
+#     }
+#
+#     aggregateQuery = [
+# 			{ "$match": "query" },
+# 			{ "$unwind": '$categories' },
+# 			# ...(options?.categoryPath? [
+#             query["categories.path"]: [
+# 						{
+# 							"$project": {
+# 								# "categoryIdPath": { "$arrayElemAt": [{ "$split": ['$categories.path', ','] }, options?.categoryPath?.split(',')?.length - 1] },
+# 								"categoryIdPrivate": '$categories.id',
+# 							},
+# 						},
+# 						{
+# 							"$project": {
+# 								"categoryId": {
+# 								    "$switch": {
+# 										"branches": [
+# 											{ "case": { "$eq": ['$categoryIdPath', None] }, "then": '$categoryIdPrivate' },
+# 											{ "case": { "$eq": ['$categoryIdPath', ''] }, "then": '$categoryIdPrivate' },
+# 											{ "case": '$categoryIdPath', "then": '$categoryIdPath' },
+# 										],
+# 										"default": '$categoryIdPrivate',
+# 									},
+# 								},
+# 							},
+# 						},
+# 				  ]
+#
+# 				# : []),
+# 			{
+# 				"$group": {
+# 					"_id": '$categoryId',
+# 					// count: { $sum: 1 }, //Performance issue
+# 				},
+# 			},
+# 		]
