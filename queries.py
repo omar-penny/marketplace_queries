@@ -15,11 +15,11 @@ def generate_random_inputs() -> (str, str):
     return sort, name
 
 
-def main_search():
+def main_search(name: str):
     page = 0
     limit = 20
-    sort, name = generate_random_inputs()
-    name = "a"
+    # sort, name = generate_random_inputs()
+    # name = "pipe"
 
     return [
         {
@@ -63,9 +63,13 @@ def main_search():
                 }
             },
 
+            "$skip": page * limit,
+
+            "$limit": limit,
+
             "$match": {
                 "status": "ACTIVE",
-                "catalogs.id": "penny-cat-1154",
+                "catalogs.id": "penny-cat-1038",
                 "details.isAvailable": True,
             },
 
@@ -83,18 +87,18 @@ def main_search():
                 "price": 1,
                 "score": {"$meta": "searchScore"},
             },
-
-            "$skip": page * limit,
-
-            "$limit": limit,
         }
     ]
 
 
 def autocomplete():
+    """
+    Average runs: 1.1~2
+    """
     # sort, name = generate_random_inputs()
-    name = "black"
-
+    name = "pip"
+    # sort, name = generate_random_inputs()
+    # print(name)
     return [
         {
             "$search": {
@@ -104,7 +108,7 @@ def autocomplete():
                             "autocomplete": {
                                 "path": 'name.en',
                                 "query": name,
-                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 3},
                                 "score": {"boost": {"value": 2}},
                             }
                         },
@@ -112,7 +116,7 @@ def autocomplete():
                             "autocomplete": {
                                 "path": 'details.sku',
                                 "query": name,
-                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 3},
                                 "score": {"boost": {"value": 3}},
                             }
                         },
@@ -120,7 +124,7 @@ def autocomplete():
                             "autocomplete": {
                                 "path": 'details.brand',
                                 "query": name,
-                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
+                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 3},
                                 "score": {"boost": {"value": 2}},
                             }
                         },
@@ -134,25 +138,26 @@ def autocomplete():
                 },
             },
 
-            "$match": {
-                "status": "ACTIVE",
-                "catalogs.id": "penny-cat-1154",
-                "details.isAvailable": True,
-            },
+            # "$match": {
+            #     "status": "ACTIVE",
+            #     # "catalogs.id": "penny-cat-1038",
+            #     "catalogs.id": "penny-cat-1154",
+            #     "details.isAvailable": True,
+            # },
 
             "$project": {
                 "id": 1,
                 "name": 1,
-                "categories": 1,
-                "catalogs": 1,
-                "details.description": 1,
-                "details.isAvailable": 1,
-                "details.brand": 1,
+                # "categories": 1,
+                # "catalogs": 1,
+                # "details.description": 1,
+                # "details.isAvailable": 1,
+                # "details.brand": 1,
                 "details.sku": 1,
-                "details.soldBy": 1,
+                # "details.soldBy": 1,
                 "mediaList": 1,
-                "price": 1,
-                "score": {"$meta": "searchScore"},
+                # "price": 1,
+                # "score": {"$meta": "searchScore"},
             },
 
             "$limit": 5
@@ -160,55 +165,9 @@ def autocomplete():
     ]
 
 
-def techSpecOptions():
-    name = "test"
+def techSpecOptions(name: str):
     query = [
         {
-            "$match": {
-                "status": "ACTIVE",
-                "catalogs.id": "penny-cat-1154",
-                "details.isAvailable": True,
-                "techSpecs": {"$ne": None},
-
-            },
-        },
-        {
-            "$project": {
-                "techSpecs": {
-                    "$objectToArray": '$techSpecs',
-                },
-            },
-        },
-        {
-            "$unwind": {
-                "path": '$techSpecs',
-            },
-        },
-        {
-            "$group": {
-                "_id": {
-                    "spec": '$techSpecs.k',
-                },
-                "total": {
-                    "$sum": 1,
-                },
-                "val": {
-                    "$addToSet": '$techSpecs.v',
-                },
-            },
-        },
-        {
-            "$sort": {
-                "total": -1,
-            },
-        },
-        {
-            "$limit": 5,
-        },
-    ]
-
-    if name:
-        query.insert(0, {
             "$search": {
                 "compound": {
                     "should": [
@@ -246,8 +205,89 @@ def techSpecOptions():
                     ],
                 },
             },
-        })
 
+            "$match": {
+                "techSpecs": {"$ne": None},
+                "status": "ACTIVE",
+                "catalogs.id": "penny-cat-1038",
+                "details.isAvailable": True,
+            },
+            "$limit": 1000,
+
+            "$project": {
+                "techSpecs": {
+                    "$objectToArray": '$techSpecs',
+                },
+            },
+
+            "$unwind": {
+                "path": '$techSpecs',
+            },
+
+            "$group": {
+                "_id": {
+                    "spec": '$techSpecs.k',
+                },
+                "total": {
+                    "$sum": 1,
+                },
+                "val": {
+                    "$addToSet": '$techSpecs.v',
+                },
+            },
+
+            "$sort": {
+                "total": -1,
+            },
+
+        },
+    ]
+
+    return query
+
+
+def techSpecOptionsThroughIds(product_ids: list):
+    query = [
+        {
+            "$match": {
+                "techSpecs": {"$ne": None},
+                "status": "ACTIVE",
+                "catalogs.id": "penny-cat-1038",
+                "details.isAvailable": True,
+                "id": {"$in": product_ids},
+            },
+
+            "$project": {
+                "techSpecs": {
+                    "$objectToArray": '$techSpecs',
+                },
+            },
+
+            "$unwind": {
+                "path": '$techSpecs',
+            },
+
+            "$group": {
+                "_id": {
+                    "spec": '$techSpecs.k',
+                },
+                "total": {
+                    "$sum": 1,
+                },
+                "val": {
+                    "$addToSet": '$techSpecs.v',
+                },
+            },
+
+            "$sort": {
+                "total": -1,
+            },
+
+            "$limit": 5,
+        },
+    ]
+
+    return query
 # def sub_categories():
 #     query = {
 #         "categories.path": ",penny-ctg-1191,penny-ctg-2112",
