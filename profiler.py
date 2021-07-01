@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Create aggregation stage list
     for stage, operations in query[0].items():
         aggregation_pipeline.append({stage: operations})
-
+    print(aggregation_pipeline)
     start = datetime.datetime.now()
     aggregation = list(collection.aggregate(aggregation_pipeline))
     end = datetime.datetime.now() - start
@@ -31,11 +31,11 @@ if __name__ == "__main__":
         runs.append({
             "number": i,
             "time": end.total_seconds(),
-            # "size": len(aggregation[i]["val"]),
+            "size": len(aggregation[i]["val"]),
             # "ID": aggregation[i]["id"],
-            # "val": aggregation[i]["val"]
-            "name[en]": aggregation[i]["name"]["en"],
-            "sku": aggregation[i]["details"]["sku"],
+            "val": aggregation[i]["val"]
+            # "name[en]": aggregation[i]["name"]["en"],
+            # "sku": aggregation[i]["details"]["sku"],
             # "description": aggregation[i]["details"]["description"],
             # "brand": aggregation[i]["details"]["brand"],
             # "specs": aggregation[i]["techSpecs"]

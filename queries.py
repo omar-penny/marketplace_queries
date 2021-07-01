@@ -191,14 +191,14 @@ def techSpecOptions(name: str):
                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
                             },
                         },
-                        {
-                            # "text": {
-                            #     "query": name,
-                            #     "path": ['details.brand'],
-                            #     "score": {"boost": {"value": 2}},
-                            #     "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 25},
-                            # },
-                        },
+                        # {
+                        #     # "text": {
+                        #     #     "query": name,
+                        #     #     "path": ['details.brand'],
+                        #     #     "score": {"boost": {"value": 2}},
+                        #     #     "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 25},
+                        #     # },
+                        # },
                     ],
                 },
             },
@@ -206,7 +206,7 @@ def techSpecOptions(name: str):
             "$match": {
                 "techSpecs": {"$ne": None},
                 "status": "ACTIVE",
-                "catalogs.id": "penny-cat-1038",
+                "catalogs.id": "penny-cat-1154",
                 "details.isAvailable": True,
             },
             # "$limit": 1000,
@@ -236,6 +236,8 @@ def techSpecOptions(name: str):
             "$sort": {
                 "total": -1,
             },
+
+            "$limit": 5
 
         },
     ]
