@@ -91,14 +91,11 @@ def main_search(name: str):
     ]
 
 
-def autocomplete():
+def autocomplete(name: str):
     """
     Average runs: 1.1~2
     """
     # sort, name = generate_random_inputs()
-    name = "pip"
-    # sort, name = generate_random_inputs()
-    # print(name)
     return [
         {
             "$search": {
@@ -138,12 +135,12 @@ def autocomplete():
                 },
             },
 
-            # "$match": {
-            #     "status": "ACTIVE",
-            #     # "catalogs.id": "penny-cat-1038",
-            #     "catalogs.id": "penny-cat-1154",
-            #     "details.isAvailable": True,
-            # },
+            "$match": {
+                "status": "ACTIVE",
+                "catalogs.id": "penny-cat-1038",
+                # "catalogs.id": "penny-cat-1154",
+                "details.isAvailable": True,
+            },
 
             "$project": {
                 "id": 1,
@@ -174,8 +171,8 @@ def techSpecOptions(name: str):
                         {
                             "text": {
                                 "query": name,
-                                "path": ['name.en'],
-                                "score": {"boost": {"value": 3}},
+                                "path": ['name.en', "details.brand"],
+                                "score": {"boost": {"value": 2}},
                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256},
                             },
                         },
@@ -190,17 +187,17 @@ def techSpecOptions(name: str):
                             "text": {
                                 "query": name,
                                 "path": ['details.sku'],
-                                "score": {"boost": {"value": 2}},
+                                "score": {"boost": {"value": 3}},
                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
                             },
                         },
                         {
-                            "text": {
-                                "query": name,
-                                "path": ['details.brand'],
-                                "score": {"boost": {"value": 3}},
-                                "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 25},
-                            },
+                            # "text": {
+                            #     "query": name,
+                            #     "path": ['details.brand'],
+                            #     "score": {"boost": {"value": 2}},
+                            #     "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 25},
+                            # },
                         },
                     ],
                 },
@@ -212,7 +209,7 @@ def techSpecOptions(name: str):
                 "catalogs.id": "penny-cat-1038",
                 "details.isAvailable": True,
             },
-            "$limit": 1000,
+            # "$limit": 1000,
 
             "$project": {
                 "techSpecs": {
@@ -288,46 +285,43 @@ def techSpecOptionsThroughIds(product_ids: list):
     ]
 
     return query
-# def sub_categories():
-#     query = {
-#         "categories.path": ",penny-ctg-1191,penny-ctg-2112",
-#         "status": "ACTIVE",
-#         "catalogs.id": "penny-cat-1154",
-#         "details.isAvailable": True,
-#     }
-#
-#     aggregateQuery = [
-# 			{ "$match": "query" },
-# 			{ "$unwind": '$categories' },
-# 			# ...(options?.categoryPath? [
-#             query["categories.path"]: [
-# 						{
-# 							"$project": {
-# 								# "categoryIdPath": { "$arrayElemAt": [{ "$split": ['$categories.path', ','] }, options?.categoryPath?.split(',')?.length - 1] },
-# 								"categoryIdPrivate": '$categories.id',
-# 							},
-# 						},
-# 						{
-# 							"$project": {
-# 								"categoryId": {
-# 								    "$switch": {
-# 										"branches": [
-# 											{ "case": { "$eq": ['$categoryIdPath', None] }, "then": '$categoryIdPrivate' },
-# 											{ "case": { "$eq": ['$categoryIdPath', ''] }, "then": '$categoryIdPrivate' },
-# 											{ "case": '$categoryIdPath', "then": '$categoryIdPath' },
-# 										],
-# 										"default": '$categoryIdPrivate',
-# 									},
-# 								},
-# 							},
-# 						},
-# 				  ]
-#
-# 				# : []),
-# 			{
-# 				"$group": {
-# 					"_id": '$categoryId',
-# 					// count: { $sum: 1 }, //Performance issue
-# 				},
-# 			},
-# 		]
+
+
+def sub_categories(name: str):
+    query2 = {
+                 "status": "ACTIVE",
+                 "catalogs.id": "penny-cat-1154",
+                 "details.isAvailable": True,
+             },
+
+    query3 = [
+        {
+            "$match": {
+                "catalogs.id": "penny-cat-1154",
+                "status": "ACTIVE",
+                "details.isAvailable": True,
+                "categories.path": "/,penny-ctg-12095,/"
+            },
+        },
+        {
+            "$unwind": "$categories",
+        },
+        {
+            "$group": {
+                "_id": "$categoryId",
+            },
+        },
+    ]
+
+    query4 = [
+        {
+            "id": {
+                "$in": []
+            }
+        },
+        {
+            "select": {"name": 1, "id": 1, "image": 1}
+        }
+    ]
+
+    return query2, query3, query4
