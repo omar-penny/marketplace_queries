@@ -15,22 +15,16 @@ db = client[DATABASE]
 collection = db[COLLECTION]
 
 
-def aggregate_query(query: str, x=False):
+def aggregate_query(query: str, passing=False):
     aggregation_pipeline = []
 
-    # for stage, operations in query[0].items():
-    #     print(stage)
-    #     if not x:
-    #         if stage != "$skip" and stage != "$limit":
-    #             aggregation_pipeline.append({stage: operations})
-
-    if not x:
+    if not passing:
         for stage, operations in query[0].items():
             print(stage)
             if stage != "$skip" and stage != "$limit":
                 aggregation_pipeline.append({stage: operations})
 
-    if x:
+    if passing:
         for stage, operations in query[0].items():
             print(stage)
             aggregation_pipeline.append({stage: operations})
@@ -49,7 +43,7 @@ if __name__ == "__main__":
     aggregation, run_time = aggregate_query(query)
 
     product_ids = [doc["id"] for doc in aggregation]
-    query = techSpecOptionsThroughIds(product_ids[:1001])
+    query = techSpecOptionsThroughIds(product_ids)
     aggregation, run_time = aggregate_query(query, True)
 
     print(len(product_ids))
