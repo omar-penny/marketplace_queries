@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from queries import autocomplete, main_search, techSpecOptions, techSpecOptionsThroughIds
+from optimized_queries import *
+from queries import *
 import datetime
 import certifi
 import os
@@ -20,14 +21,14 @@ def aggregate_query(query: str, passing=False):
 
     if not passing:
         for stage, operations in query[0].items():
-            print(stage)
             if stage != "$skip" and stage != "$limit":
                 aggregation_pipeline.append({stage: operations})
 
     if passing:
         for stage, operations in query[0].items():
-            print(stage)
             aggregation_pipeline.append({stage: operations})
+
+        print(aggregation_pipeline)
 
     start = datetime.datetime.now()
     aggregation = list(collection.aggregate(aggregation_pipeline))
@@ -37,22 +38,22 @@ def aggregate_query(query: str, passing=False):
 
 
 if __name__ == "__main__":
-    aggregation_pipeline = []
+    # aggregation_pipeline = []
     runs = []
-    query = main_search("pipe")
-    aggregation, run_time = aggregate_query(query)
-
-    product_ids = [doc["id"] for doc in aggregation]
-    query = techSpecOptionsThroughIds(product_ids)
+    # query = main_search("pipe")
+    # aggregation, run_time = aggregate_query(query)
+    #
+    # product_ids = [doc["id"] for doc in aggregation]
+    query = tech_spec_options("pipe")
     aggregation, run_time = aggregate_query(query, True)
 
-    print(len(product_ids))
     for i in range(0, len(aggregation)):
         runs.append({
             "number": i,
             "time": run_time.total_seconds(),
             "size": len(aggregation[i]["val"]),
             # "ID": aggregation[i]["id"],
+            "_id": aggregation[i]["_id"],
             "val": aggregation[i]["val"],
             # "name[en]": aggregation[i]["name"]["en"],
             # "sku": aggregation[i]["details"]["sku"],
