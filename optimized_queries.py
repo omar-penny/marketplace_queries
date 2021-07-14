@@ -172,3 +172,71 @@ def main_search(name: str):
             },
         }
     ]
+
+
+def filter_options_search(name: str):
+    pipeline = [{
+        "$search": {
+            "compound": {
+                "should": [
+                    {
+                        "phrase": {
+                            "query": name,
+                            "path": ["name.en", "details.brand", "details.sku", "details.description"],
+                            "score": {"boost": {"value": 3}},
+                        },
+                    },
+
+                    {
+                        "text": {
+                            "query": name,
+                            "path": ["name.en", "details.brand"],
+                            "score": {"boost": {"value": 2}},
+                            "fuzzy": {"maxEdits": 2, "prefixLength": 0, "maxExpansions": 10},
+                        },
+                    },
+
+                    {
+                        "text": {
+                            "query": name,
+                            "path": ["details.description"],
+                            "fuzzy": {"maxEdits": 2, "prefixLength": 0, "maxExpansions": 10},
+                        }
+                    },
+
+                    {
+                        "text": {
+                            "query": name,
+                            "path": ["details.sku"],
+                            "fuzzy": {"maxEdits": 2, "prefixLength": 0, "maxExpansions": 10},
+                            "score": {"boost": {"value": 3}},
+                        }
+                    },
+                ],
+            }
+        },
+
+        "$match": {
+            "status": "ACTIVE",
+            "catalogs.id": "penny-cat-1038",
+            "details.isAvailable": True,
+        },
+
+        "$unwind": {
+            "path": "$details.brand",
+            "preserveNullAndEmptyArrays": False
+        },
+
+        # "$unwind": {
+        #     "path": "$vendors",
+        #     "preserveNullAndEmptyArrays": False
+        # },
+
+        "$group": {
+            "_id": None,
+            "uniqueBrands": {"$addToSet": "$details.brand"},
+            "uniqueVendors": {"$addToSet": "$vendors.connection.name"}
+        }
+    }]
+
+    return pipeline
