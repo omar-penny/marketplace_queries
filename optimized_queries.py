@@ -22,12 +22,12 @@ def filter_options_aggregation():
         },
 
         "$unwind": {
-            "path": "details.brand",
+            "path": "$details.brand",
             "preserveNullAndEmptyArrays": False
         },
 
         "$unwind": {
-            "path": "vendors.connection.name",
+            "path": "$vendors",
             "preserveNullAndEmptyArrays": False
         },
 
