@@ -1,13 +1,16 @@
+catalog_id = "penny-cat-1038"
+
+
 def filter_options_aggregation():
     """
     Changes: Initial match query is the same, but two unwind stages and a group stage were added
     Some categories return null in the list of brands/suppliers -> preserveNullAndEmptyArrays: False
     """
-    category = "penny-ctg-3911"
+    category = "penny-ctg-9505"
 
     pipeline = [{
         "$match": {
-            "catalogs.id": "penny-cat-1038",
+            "catalogs.id": catalog_id,
             "$or": [
                 {
                     "categories.path": {
@@ -26,10 +29,10 @@ def filter_options_aggregation():
             "preserveNullAndEmptyArrays": False
         },
 
-        "$unwind": {
-            "path": "$vendors",
-            "preserveNullAndEmptyArrays": False
-        },
+        # "$unwind": {
+        #     "path": "$vendors",
+        #     "preserveNullAndEmptyArrays": False
+        # },
 
         "$group": {
             "_id": None,
@@ -81,7 +84,7 @@ def autocomplete(name: str):
 
             "$match": {
                 "status": "ACTIVE",
-                "catalogs.id": "penny-cat-1154",
+                "catalogs.id": catalog_id,
                 "details.isAvailable": True,
             },
 
@@ -152,7 +155,7 @@ def main_search(name: str):
 
             "$match": {
                 "status": "ACTIVE",
-                "catalogs.id": "penny-cat-1038",
+                "catalogs.id": catalog_id,
                 "details.isAvailable": True,
             },
 
@@ -218,7 +221,7 @@ def filter_options_search(name: str):
 
         "$match": {
             "status": "ACTIVE",
-            "catalogs.id": "penny-cat-1038",
+            "catalogs.id": catalog_id,
             "details.isAvailable": True,
         },
 

@@ -2,6 +2,7 @@
 Optimized: main_search, autocomplete, filter_options
 @TODO: tech_spec_options, sub_categories, getProductsByQuery
 """
+catalog_id = "penny-cat-1038"
 
 
 def generate_random_inputs() -> (str, str):
@@ -66,8 +67,7 @@ def main_search_count(name: str):
 
             "$match": {
                 "status": "ACTIVE",
-                # "catalogs.id": "penny-cat-1038",
-                "catalogs.id": "penny-cat-1154",
+                "catalogs.id": catalog_id,
                 "details.isAvailable": True,
             },
 
@@ -85,7 +85,7 @@ def tech_spec_options(name: str):
                         {
                             "text": {
                                 "query": name,
-                                "path": ['name.en', "details.brand"],
+                                "path": ["name.en", "details.brand"],
                                 "score": {"boost": {"value": 2}},
                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256},
                             },
@@ -93,14 +93,14 @@ def tech_spec_options(name: str):
                         {
                             "text": {
                                 "query": name,
-                                "path": ['details.description'],
+                                "path": ["details.description"],
                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 256},
                             },
                         },
                         {
                             "text": {
                                 "query": name,
-                                "path": ['details.sku'],
+                                "path": ["details.sku"],
                                 "score": {"boost": {"value": 3}},
                                 "fuzzy": {"maxEdits": 1, "prefixLength": 3, "maxExpansions": 10},
                             },
@@ -112,30 +112,30 @@ def tech_spec_options(name: str):
             "$match": {
                 "techSpecs": {"$ne": None},
                 "status": "ACTIVE",
-                "catalogs.id": "penny-cat-1038",
+                "catalogs.id": catalog_id,
                 "details.isAvailable": True,
             },
             # "$limit": 1000,
 
             "$project": {
                 "techSpecs": {
-                    "$objectToArray": '$techSpecs',
+                    "$objectToArray": "$techSpecs",
                 },
             },
 
             "$unwind": {
-                "path": '$techSpecs',
+                "path": "$techSpecs",
             },
 
             "$group": {
                 "_id": {
-                    "spec": '$techSpecs.k',
+                    "spec": "$techSpecs.k",
                 },
                 "total": {
                     "$sum": 1,
                 },
                 "val": {
-                    "$addToSet": '$techSpecs.v',
+                    "$addToSet": "$techSpecs.v",
                 },
             },
 
@@ -161,7 +161,7 @@ def sub_categories(name: str):
     match_query = [
         {
             "$match": {
-                "catalogs.id": "penny-cat-1154",
+                "catalogs.id": catalog_id,
                 "status": "ACTIVE",
                 "details.isAvailable": True,
                 "categories.path": {
@@ -187,3 +187,90 @@ def sub_categories(name: str):
     ]
 
     return match_query, select_query
+
+
+def wildcard_search():
+    return \
+        [
+            {
+                "$search": {
+                    "index": "test",
+                    "wildcard": {
+                        "query": "*penny-ctg-9505*",
+                        "path":
+                            "categories.path"
+                    }
+                }
+            }
+        ]
+
+
+def category_products():
+    category = "penny-ctg-9505"
+
+    pipeline = [
+        {
+            "$match": {
+                "status": "ACTIVE",
+                "catalogs.id": catalog_id,
+                "$or": [
+                    {
+                        "categories.path": {
+                            "$regex": f",{category},"
+                        }
+                    },
+                    {"categories.id": category}
+                ],
+            },
+
+            "$limit": 25,
+
+            "$skip": 0 * 25,
+
+            "$project": {
+                "id": 1,
+                "name": 1,
+                "categories": 1,
+                "catalogs": 1,
+                "details.description": 1,
+                "details.isAvailable": 1,
+                "details.brand": 1,
+                "details.sku": 1,
+                "details.soldBy": 1,
+                "mediaList": 1,
+                "price": 1,
+                "vendors": 1,
+            }
+
+            # "$facet": {
+            #     "paginatedResults": [
+            #         {
+            #             "$project": {
+            #                 "id": 1,
+            #                 "name": 1,
+            #                 "categories": 1,
+            #                 "catalogs": 1,
+            #                 "details.description": 1,
+            #                 "details.isAvailable": 1,
+            #                 "details.brand": 1,
+            #                 "details.sku": 1,
+            #                 "details.soldBy": 1,
+            #                 "mediaList": 1,
+            #                 "price": 1,
+            #                 "score": {"$meta": "searchScore"}
+            #             }
+            #         },
+            #         {"$sort": {"score": -1}},
+            #         {"$skip": 0*25},
+            #         {"$limit": 25}
+            #     ],
+            #     "totalCount": [
+            #         {
+            #             "$count": 'count'
+            #         }
+            #     ]
+            # }
+        }
+    ]
+
+    return pipeline
