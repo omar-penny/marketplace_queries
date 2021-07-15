@@ -25,14 +25,9 @@ def filter_options_aggregation():
         },
 
         "$unwind": {
-            "path": "$details.brand",
+            "path": "$vendors",
             "preserveNullAndEmptyArrays": False
         },
-
-        # "$unwind": {
-        #     "path": "$vendors",
-        #     "preserveNullAndEmptyArrays": False
-        # },
 
         "$group": {
             "_id": None,
